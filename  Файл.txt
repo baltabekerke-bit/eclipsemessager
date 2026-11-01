@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eclipse Message — Черная Дыра</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        void: { bg: '#020204', panel: '#08080e', bubble: '#11111a', border: '#1c1c2b', accent: '#a855f7', glow: '#38bdf8', text: '#f8fafc', muted: '#94a3b8' }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #020204; color: #f8fafc; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(168, 85, 247, 0.2); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(168, 85, 247, 0.4); }
+        .black-hole-glow {
+            box-shadow: 0 0 35px rgba(56, 189, 248, 0.15), inset 0 0 20px rgba(168, 85, 247, 0.25);
+        }
+        .message-glow {
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.12);
+        }
+        .accretion-disk {
+            background: conic-gradient(from 0deg at 50% 50%, #38bdf8 0deg, #a855f7 120deg, #ec4899 240deg, #38bdf8 360deg);
+            animation: spin 10s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-[#020204] text-slate-100 h-screen overflow-hidden flex flex-col">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- AUTHENTICATION SCREEN -->
+    <div id="auth-screen" class="fixed inset-0 z-50 bg-[#020204] flex items-center justify-center p-4">
+        <!-- Background Cosmic Nebula Effect -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none">
+            <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-900/10 rounded-full blur-[120px]"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-900/10 rounded-full blur-[120px]"></div>
+        </div>
+
+        <div class="bg-[#08080e] border border-cyan-500/30 rounded-3xl w-full max-w-md p-8 shadow-2xl relative overflow-hidden backdrop-blur-xl black-hole-glow">
+            <div class="text-center mb-8 relative z-10">
+                <!-- Black Hole Logo Animation -->
+                <div class="w-20 h-20 rounded-full mx-auto flex items-center justify-center relative p-0.5 mb-4 accretion-disk shadow-[0_0_25px_rgba(56,189,248,0.4)]">
+                    <div class="w-full h-full rounded-full bg-[#020204] flex items-center justify-center relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-tr from-purple-900/40 to-cyan-900/40"></div>
+                        <div class="w-6 h-6 rounded-full bg-cyan-400 shadow-[0_0_15px_#38bdf8] z-10 animate-pulse"></div>
+                    </div>
+                </div>
+                <h1 class="text-2xl font-bold tracking-tight text-white">Eclipse Message</h1>
+                <p class="text-xs text-cyan-400 font-medium mt-1">Мессенджер горизонта событий</p>
+            </div>
+
+            <div id="auth-tabs" class="flex gap-2 mb-6 bg-[#020204] p-1.5 rounded-xl border border-white/5 relative z-10">
+                <button onclick="switchAuthTab('login')" id="tab-login" class="flex-1 py-2 text-xs font-semibold rounded-lg bg-cyan-600 text-white transition">Вход</button>
+                <button onclick="switchAuthTab('register')" id="tab-register" class="flex-1 py-2 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition">Регистрация</button>
+            </div>
+
+            <form onsubmit="handleAuthSubmit(event)" class="space-y-4 relative z-10">
+                <div id="name-field-container" class="hidden">
+                    <label class="text-xs font-medium text-slate-400 mb-1 block">Имя пилота</label>
+                    <input type="text" id="auth-name" placeholder="Астронавт Космос" class="w-full bg-[#020204] border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500 text-white">
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-slate-400 mb-1 block">Космический Email</label>
+                    <input type="email" id="auth-email" required placeholder="pilot@eclipse.space" class="w-full bg-[#020204] border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500 text-white">
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-slate-400 mb-1 block">Квантовый Пароль</label>
+                    <input type="password" id="auth-password" required placeholder="••••••••" class="w-full bg-[#020204] border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500 text-white">
+                </div>
+                <button type="submit" id="auth-submit-btn" class="w-full py-3 bg-gradient-to-r from-cyan-600 via-purple-600 to-indigo-600 hover:opacity-90 text-white font-medium rounded-xl shadow-lg shadow-cyan-500/20 transition text-sm">Войти в систему</button>
+            </form>
+
+            <div class="mt-6 pt-6 border-t border-white/5 flex flex-col gap-3 relative z-10">
+                <button onclick="loginAnonymously()" class="w-full py-2.5 bg-[#020204] hover:bg-white/5 border border-white/10 text-slate-300 font-medium rounded-xl text-xs transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-meteor text-cyan-400"></i> Быстрый запуск (Гость)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div id="main-app" class="flex flex-1 overflow-hidden relative hidden">
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-full md:w-80 lg:w-96 flex flex-col border-r border-white/10 bg-[#08080e] absolute md:relative inset-y-0 left-0 z-30 transition-transform duration-300">
+            
+            <!-- User Profile Header -->
+            <div class="p-4 border-b border-white/10 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <!-- Black Hole Avatar Preview -->
+                        <div class="w-11 h-11 rounded-full p-0.5 accretion-disk shadow-lg flex items-center justify-center">
+                            <div class="w-full h-full rounded-full bg-[#020204] flex items-center justify-center relative overflow-hidden">
+                                <div class="w-3.5 h-3.5 rounded-full bg-cyan-400 shadow-[0_0_10px_#38bdf8]"></div>
+                            </div>
+                        </div>
+                        <span class="absolute bottom-0 right-0 w-3 h-3 bg-cyan-400 border-2 border-[#08080e] rounded-full"></span>
+                    </div>
+                    <div class="min-w-0">
+                        <h2 class="font-semibold text-sm leading-tight truncate text-white" id="my-display-name">Загрузка...</h2>
+                        <span class="text-xs text-cyan-400 font-medium">Черная дыра: Активна</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1">
+                    <button onclick="logoutUser()" title="Выйти" class="p-2.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-red-400 transition">
+                        <i class="fa-solid fa-power-off text-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="p-3">
+                <div class="relative">
+                    <i class="fa-solid fa-orbit absolute left-3.5 top-1/2 -translate-y-1/2 text-cyan-400 text-sm"></i>
+                    <input type="text" id="chat-search" oninput="filterChats()" placeholder="Поиск сигналов..." class="w-full bg-[#020204] border border-white/10 rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-cyan-500 transition placeholder:text-slate-500 text-white">
+                </div>
+            </div>
+
+            <!-- Chat List -->
+            <div id="chats-list" class="flex-1 overflow-y-auto divide-y divide-white/5">
+                <!-- Dynamically Populated -->
+            </div>
+
+            <!-- Sidebar Footer -->
+            <div class="p-3 border-t border-white/10 flex items-center justify-around bg-[#020204]">
+                <button onclick="openNewChatModal()" class="flex flex-col items-center gap-1 text-slate-400 hover:text-cyan-400 transition text-xs font-medium">
+                    <i class="fa-solid fa-satellite text-base"></i> Новый чат
+                </button>
+                <button onclick="openAiBotChat()" class="flex flex-col items-center gap-1 text-slate-400 hover:text-purple-400 transition text-xs font-medium">
+                    <i class="fa-solid fa-wand-magic-sparkles text-base"></i> Eclipse AI
+                </button>
+                <button onclick="openMiniGamesModal()" class="flex flex-col items-center gap-1 text-slate-400 hover:text-cyan-400 transition text-xs font-medium">
+                    <i class="fa-solid fa-gamepad text-base"></i> Орбита Игр
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main id="chat-area" class="flex-1 flex flex-col bg-[#020204] relative overflow-hidden">
+            
+            <!-- Empty State -->
+            <div id="empty-state" class="flex-1 flex flex-col items-center justify-center p-6 text-center text-slate-500">
+                <div class="w-28 h-28 rounded-full accretion-disk flex items-center justify-center p-1 mb-6 shadow-2xl black-hole-glow">
+                    <div class="w-full h-full rounded-full bg-[#020204] flex items-center justify-center relative overflow-hidden">
+                        <div class="w-8 h-8 rounded-full bg-cyan-400 shadow-[0_0_20px_#38bdf8] animate-pulse"></div>
+                    </div>
+                </div>
+                <h3 class="text-xl font-semibold text-slate-200 mb-1">Горизонт Собеседований</h3>
+                <p class="text-sm max-w-sm text-slate-400">Выберите чат на панели слева или настройте связь с Искусственным Интеллектом черной дыры.</p>
+                <button onclick="openNewChatModal()" class="mt-5 px-5 py-2.5 bg-gradient-to-r from-cyan-600 to-purple-600 hover:opacity-90 text-white font-medium text-sm rounded-xl shadow-lg shadow-cyan-500/20 transition">Установить связь</button>
+            </div>
+
+            <!-- Active Chat Box -->
+            <div id="active-chat-container" class="flex-1 flex flex-col h-full hidden">
+                
+                <!-- Chat Header -->
+                <div class="p-3.5 border-b border-white/10 bg-[#08080e] backdrop-blur-md flex items-center justify-between z-10">
+                    <div class="flex items-center gap-3">
+                        <button onclick="closeActiveChatMobile()" class="md:hidden p-2 text-slate-400 hover:text-white transition">
+                            <i class="fa-solid fa-arrow-left text-lg"></i>
+                        </button>
+                        <div class="relative">
+                            <div class="w-10 h-10 rounded-full p-0.5 accretion-disk flex items-center justify-center shadow-md">
+                                <div class="w-full h-full rounded-full bg-[#020204] flex items-center justify-center">
+                                    <div class="w-3 h-3 rounded-full bg-cyan-400"></div>
+                                </div>
+                            </div>
+                            <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-cyan-400 border-2 border-[#08080e] rounded-full"></span>
+                        </div>
+                        <div>
+                            <h3 id="active-name" class="font-semibold text-sm leading-tight text-white"></h3>
+                            <span id="active-status" class="text-xs text-cyan-400/80">Гравитационный канал стабилен</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button onclick="openMiniGamesModal()" title="Мини-игры" class="p-2.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-purple-400 transition">
+                            <i class="fa-solid fa-gamepad text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Messages Container -->
+                <div id="messages-scroll" class="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-3 space-y-1 bg-[#020204]">
+                    <!-- Dynamic messages -->
+                </div>
+
+                <!-- Input Footer -->
+                <div class="p-3 border-t border-white/10 bg-[#08080e] backdrop-blur-md relative">
+                    
+                    <!-- Emoji Picker -->
+                    <div id="emoji-picker" class="hidden absolute bottom-20 left-4 z-30 bg-[#08080e] border border-cyan-500/30 rounded-2xl shadow-2xl p-3 w-72 backdrop-blur-xl black-hole-glow">
+                        <div class="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
+                            <span class="text-xs font-semibold text-cyan-400 uppercase">Космические эмодзи</span>
+                            <button onclick="toggleEmojiPicker()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <div class="grid grid-cols-6 gap-2 text-xl" id="emoji-grid"></div>
+                    </div>
+
+                    <form onsubmit="handleSendMessage(event)" class="flex items-center gap-2">
+                        <button type="button" onclick="toggleEmojiPicker()" class="p-2.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition hidden sm:block">
+                            <i class="fa-regular fa-face-smile text-lg"></i>
+                        </button>
+                        <button type="button" onclick="simulateVoiceMessage()" title="Голосовое сообщение" class="p-2.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-cyan-400 transition">
+                            <i class="fa-solid fa-microphone text-lg"></i>
+                        </button>
+                        <input type="text" id="message-input" autocomplete="off" placeholder="Передать сигнал через черную дыру..." class="flex-1 bg-[#020204] border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition placeholder:text-slate-500 text-white">
+                        <button type="submit" class="bg-gradient-to-r from-cyan-600 to-purple-600 hover:opacity-90 text-white p-2.5 rounded-xl shadow-lg shadow-cyan-500/20 transition flex items-center justify-center min-w-[42px]">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL: New Chat -->
+    <div id="new-chat-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-[#08080e] border border-cyan-500/30 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl black-hole-glow">
+            <div class="p-5 border-b border-white/10 flex items-center justify-between">
+                <h3 class="font-semibold text-base text-white">Новый квантовый канал</h3>
+                <button onclick="closeNewChatModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div>
+                    <label class="text-xs font-medium text-slate-400 mb-1 block">Email собеседника в космосе</label>
+                    <input type="email" id="new-chat-email" placeholder="astronaut@eclipse.space" class="w-full bg-[#020204] border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500 text-white">
+                </div>
+                <button onclick="startChatWithUser()" class="w-full py-3 bg-gradient-to-r from-cyan-600 to-purple-600 hover:opacity-90 text-white font-medium rounded-xl shadow-lg shadow-cyan-500/20 transition">Установить связь</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Mini Games -->
+    <div id="minigames-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-[#08080e] border border-cyan-500/30 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col p-6 black-hole-glow">
+            <div class="flex items-center justify-between pb-4 border-b border-white/10">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-gamepad text-cyan-400 text-xl"></i>
+                    <h3 class="font-semibold text-base text-white">Космические Крестики-Нолики</h3>
+                </div>
+                <button onclick="closeMiniGamesModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="py-6 flex flex-col items-center">
+                <div id="ttt-board" class="grid grid-cols-3 gap-2 w-64 h-64 mb-4"></div>
+                <span id="ttt-status" class="text-sm font-medium text-cyan-400 mb-4">Ваш ход (X)</span>
+                <button onclick="resetTicTacToe()" class="px-4 py-1.5 bg-[#020204] border border-white/10 hover:bg-white/5 text-xs font-medium rounded-lg transition text-slate-200">Перезапуск</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK Setup & App Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'eclipse-message-blackhole';
+        const firebaseConfig = JSON.parse(__firebase_config);
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let activeChatId = null;
+        let unsubsMessages = null;
+        let chatsCache = [];
+
+        window.switchAuthTab = (tab) => {
+            const isLogin = tab === 'login';
+            document.getElementById('tab-login').className = isLogin ? 'flex-1 py-2 text-xs font-semibold rounded-lg bg-cyan-600 text-white transition' : 'flex-1 py-2 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition';
+            document.getElementById('tab-register').className = !isLogin ? 'flex-1 py-2 text-xs font-semibold rounded-lg bg-cyan-600 text-white transition' : 'flex-1 py-2 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition';
+            document.getElementById('name-field-container').classList.toggle('hidden', isLogin);
+            document.getElementById('auth-submit-btn').textContent = isLogin ? 'Войти в систему' : 'Зарегистрировать пилота';
+        };
+
+        window.handleAuthSubmit = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-password').value;
+            const name = document.getElementById('auth-name').value;
+            const isRegister = !document.getElementById('name-field-container').classList.contains('hidden');
+
+            try {
+                if (isRegister) {
+                    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', cred.user.uid), {
+                        uid: cred.user.uid,
+                        email: email,
+                        name: name || email.split('@')[0]
+                    });
+                    showToast("Добро пожаловать в систему Черной Дыры!");
+                } else {
+                    await signInWithEmailAndPassword(auth, email, pass);
+                    showToast("Успешное подключение к сингулярности!");
+                }
+            } catch (err) {
+                showToast("Ошибка аутентификации: " + err.message);
+            }
+        };
+
+        window.loginAnonymously = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                const uid = auth.currentUser.uid;
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid), {
+                    uid: uid,
+                    email: 'guest@eclipse.space',
+                    name: 'КосмоПилот_' + uid.substring(0, 4)
+                }, { merge: true });
+                showToast("Гостевой сеанс активирован!");
+            } catch (err) {
+                showToast("Ошибка гостевого входа: " + err.message);
+            }
+        };
+
+        window.logoutUser = () => {
+            signOut(auth);
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+
+                const userDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', user.uid));
+                let userName = user.email || 'Пилот';
+                if (userDoc.exists()) {
+                    userName = userDoc.data().name;
+                }
+                document.getElementById('my-display-name').textContent = userName;
+
+                loadChats();
+            } else {
+                currentUser = null;
+                document.getElementById('auth-screen').classList.remove('hidden');
+                document.getElementById('main-app').classList.add('hidden');
+            }
+        });
+
+        function loadChats() {
+            const chatsRef = collection(db, 'artifacts', appId, 'public', 'data', 'chats');
+            onSnapshot(chatsRef, (snapshot) => {
+                chatsCache = [];
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data.members && data.members.includes(currentUser.uid)) {
+                        chatsCache.push({ id: docSnap.id, ...data });
+                    }
+                });
+                renderChatsList();
+            }, (err) => console.error(err));
+        }
+
+        window.renderChatsList = () => {
+            const listContainer = document.getElementById('chats-list');
+            const queryText = (document.getElementById('chat-search').value || '').toLowerCase();
+            const filtered = chatsCache.filter(c => (c.title || '').toLowerCase().includes(queryText));
+
+            if (filtered.length === 0) {
+                listContainer.innerHTML = `<div class="p-6 text-center text-slate-500 text-xs">Нет активных каналов связи.</div>`;
+                return;
+            }
+
+            listContainer.innerHTML = filtered.map(chat => {
+                const isActive = activeChatId === chat.id;
+                const title = chat.title || 'Квантовый Чат';
+                return `
+                    <div onclick="selectChat('${chat.id}', '${title}')" class="p-3.5 flex items-center gap-3 cursor-pointer transition hover:bg-white/5 ${isActive ? 'bg-white/10 border-l-4 border-cyan-400' : ''}">
+                        <div class="w-11 h-11 rounded-full p-0.5 accretion-disk flex items-center justify-center shrink-0 shadow-md">
+                            <div class="w-full h-full rounded-full bg-[#020204] flex items-center justify-center">
+                                <div class="w-3.5 h-3.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#38bdf8]"></div>
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-semibold text-sm truncate text-slate-200">${title}</h4>
+                            <p class="text-xs text-slate-400 truncate">Зашифровано черной дырой</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        };
+
+        window.selectChat = (chatId, chatName) => {
+            activeChatId = chatId;
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('active-chat-container').classList.remove('hidden');
+            document.getElementById('active-name').textContent = chatName;
+
+            renderChatsList();
+            subscribeToMessages(chatId);
+
+            if (window.innerWidth < 768) {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+            }
+        };
+
+        window.closeActiveChatMobile = () => {
+            document.getElementById('sidebar').classList.remove('-translate-x-full');
+            document.getElementById('active-chat-container').classList.add('hidden');
+            document.getElementById('empty-state').classList.remove('hidden');
+            activeChatId = null;
+            if (unsubsMessages) unsubsMessages();
+        };
+
+        function subscribeToMessages(chatId) {
+            if (unsubsMessages) unsubsMessages();
+            const msgRef = collection(db, 'artifacts', appId, 'public', 'data', 'chats', chatId, 'messages');
+            
+            unsubsMessages = onSnapshot(msgRef, (snapshot) => {
+                const messages = [];
+                snapshot.forEach(d => messages.push({ id: d.id, ...d.data() }));
+                messages.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
+                const scrollArea = document.getElementById('messages-scroll');
+                scrollArea.innerHTML = messages.map(msg => {
+                    const isMe = msg.senderId === currentUser.uid;
+                    return `
+                        <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-1">
+                            <div class="max-w-[75%] rounded-2xl px-4 py-2.5 text-sm shadow-md ${isMe ? 'bg-gradient-to-r from-cyan-600 to-purple-600 text-white rounded-br-none message-glow' : 'bg-[#08080e] border border-cyan-500/20 text-slate-200 rounded-bl-none'}">
+                                <p class="leading-relaxed break-words">${msg.text}</p>
+                                <span class="text-[10px] opacity-70 block text-right mt-1">${new Date(msg.timestamp || Date.now()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                scrollArea.scrollTop = scrollArea.scrollHeight;
+            }, (err) => console.error(err));
+        }
+
+        window.handleSendMessage = async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('message-input');
+            const text = input.value.trim();
+            if (!text || !activeChatId) return;
+
+            const msgRef = collection(db, 'artifacts', appId, 'public', 'data', 'chats', activeChatId, 'messages');
+            await addDoc(msgRef, {
+                senderId: currentUser.uid,
+                text: text,
+                timestamp: Date.now()
+            });
+
+            const currentChat = chatsCache.find(c => c.id === activeChatId);
+            if (currentChat && currentChat.isAi) {
+                callEclipseAI(text, activeChatId);
+            }
+
+            input.value = '';
+        };
+
+        async function callEclipseAI(prompt, chatId) {
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        systemInstruction: { parts: [{ text: "You are Eclipse AI, an intelligent entity born inside a supermassive black hole. Provide wise, mystical, yet scientifically grounded cosmic answers." }] }
+                    })
+                });
+                const result = await response.json();
+                const aiText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Гравитационные помехи...";
+
+                const msgRef = collection(db, 'artifacts', appId, 'public', 'data', 'chats', chatId, 'messages');
+                await addDoc(msgRef, {
+                    senderId: 'eclipse-ai-bot',
+                    text: aiText,
+                    timestamp: Date.now()
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        window.openAiBotChat = async () => {
+            const existingAiChat = chatsCache.find(c => c.isAi);
+            if (existingAiChat) {
+                selectChat(existingAiChat.id, existingAiChat.title);
+                return;
+            }
+
+            const chatsRef = collection(db, 'artifacts', appId, 'public', 'data', 'chats');
+            const newChatDoc = await addDoc(chatsRef, {
+                title: 'Eclipse AI (Сингулярность)',
+                members: [currentUser.uid],
+                isAi: true,
+                createdAt: Date.now()
+            });
+
+            const msgRef = collection(db, 'artifacts', appId, 'public', 'data', 'chats', newChatDoc.id, 'messages');
+            await addDoc(msgRef, {
+                senderId: 'eclipse-ai-bot',
+                text: 'Приветствую, пилот. Я ИИ Черной Дыры Eclipse AI. О чем поведают твои квантовые мысли?',
+                timestamp: Date.now()
+            });
+
+            selectChat(newChatDoc.id, 'Eclipse AI (Сингулярность)');
+        };
+
+        window.openNewChatModal = () => document.getElementById('new-chat-modal').classList.remove('hidden');
+        window.closeNewChatModal = () => document.getElementById('new-chat-modal').classList.add('hidden');
+
+        window.startChatWithUser = async () => {
+            const email = document.getElementById('new-chat-email').value.trim();
+            if (!email) return;
+
+            const usersRef = collection(db, 'artifacts', appId, 'public', 'data', 'users');
+            const snapshot = await getDocs(usersRef);
+            let targetUser = null;
+            snapshot.forEach(d => {
+                if (d.data().email === email) {
+                    targetUser = d.data();
+                }
+            });
+
+            if (!targetUser) {
+                showToast("Пилот не найден в этой галактике!");
+                return;
+            }
+
+            const chatsRef = collection(db, 'artifacts', appId, 'public', 'data', 'chats');
+            const newChatDoc = await addDoc(chatsRef, {
+                title: targetUser.name,
+                members: [currentUser.uid, targetUser.uid],
+                createdAt: Date.now()
+            });
+
+            closeNewChatModal();
+            selectChat(newChatDoc.id, targetUser.name);
+            showToast("Канал успешно проложен!");
+        };
+
+        window.simulateVoiceMessage = async () => {
+            if (!activeChatId) return;
+            const msgRef = collection(db, 'artifacts', appId, 'public', 'data', 'chats', activeChatId, 'messages');
+            await addDoc(msgRef, {
+                senderId: currentUser.uid,
+                text: '🌌 [Квантовое аудио - 0:19]',
+                timestamp: Date.now()
+            });
+            showToast("Аудио-сигнал отправлен!");
+        };
+
+        const emojis = ['🌌','🌑','🌒','🌓','🌔','🌕','✨','⭐','🪐','🚀','☄️','💎'];
+        document.getElementById('emoji-grid').innerHTML = emojis.map(em => `<button type="button" onclick="document.getElementById('message-input').value += '${em}'" class="hover:bg-white/5 p-1.5 rounded-xl transition">${em}</button>`).join('');
+        window.toggleEmojiPicker = () => document.getElementById('emoji-picker').classList.toggle('hidden');
+
+        window.openMiniGamesModal = () => document.getElementById('minigames-modal').classList.remove('hidden');
+        window.closeMiniGamesModal = () => document.getElementById('minigames-modal').classList.add('hidden');
+
+        let tttState = ['', '', '', '', '', '', '', '', ''];
+        window.initTicTacToe = () => {
+            document.getElementById('ttt-board').innerHTML = tttState.map((val, idx) => `
+                <button onclick="makeTTTMove(${idx})" class="w-full h-full bg-[#020204] border border-cyan-500/20 hover:bg-white/5 rounded-xl text-2xl font-bold flex items-center justify-center text-cyan-400 transition">${val}</button>
+            `).join('');
+        };
+        window.makeTTTMove = (idx) => {
+            if (tttState[idx] !== '') return;
+            tttState[idx] = 'X';
+            window.initTicTacToe();
+        };
+        window.resetTicTacToe = () => {
+            tttState = ['', '', '', '', '', '', '', '', ''];
+            window.initTicTacToe();
+        };
+        window.initTicTacToe();
+
+        function showToast(msg) {
+            const container = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            t.className = 'bg-[#08080e] border border-cyan-500/30 text-slate-100 text-xs px-4 py-2.5 rounded-xl shadow-2xl black-hole-glow';
+            t.textContent = msg;
+            container.appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
